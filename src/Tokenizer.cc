@@ -12,6 +12,7 @@ namespace AI {
     
     std::string buffer;
     
+    // workaround for negatives
     tokens.push_back(this->newToken(T_BEGIN));
     
     token_type currentToken = T_UNKNOWN;
@@ -92,11 +93,15 @@ namespace AI {
           // Operators
           else {
             std::string op;
+            // for each operator (operators are sorted from longest to shortest)
             for (int i = 0; i < OPERATORS_L_COUNT; i++) {
               op = OPERATORS_L[i];
               
+              // if there is operator from current position
               if (std::string(it, command.end()).find(op) == 0) {
+                // put operator
                 tokens.push_back(this->createOperator(op));
+                // move iterator (skip operator length)
                 it += op.length()-1;
                 break;
               }
@@ -108,11 +113,17 @@ namespace AI {
     
     // Negative numbers
     if (tokens.size() >= 3) {
+      // start from middle (where probably is sign)
       for (std::vector<token>::iterator it = tokens.begin()+1; it != tokens.end()-1; it++) {
+        // if next is number
         if ((it+1)->type == T_NUMBER) {
+          // if previous is start of subcontext
           if ((it-1)->type == T_COMMA || (it-1)->type == T_LB || (it-1)->type == T_LC || (it-1)->type == T_LS || (it-1)->type == T_BEGIN) {
+            // if its minus
             if (it->type == T_OPERATOR && it->data == "-") {
+              // change minus to nop so its not important
               it->type = T_NOP;
+              // add change number to negative
               (it+1)->data.insert(0, "-");
             }
           }

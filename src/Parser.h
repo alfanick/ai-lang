@@ -4,10 +4,11 @@
 #include <iostream>
 #include <vector>
 
-#include "Context.h"
-#include "Tokenizer.h"
+#include "AILang.h"
 
 namespace AI {
+  class Context;
+  
   /**
    * Main parser.
    *
@@ -32,6 +33,11 @@ namespace AI {
        * it is used instead of systemContext.
        */
       Context *globalContext;
+    
+      /**
+       * Tokenizer for language.
+       */
+      Tokenizer *tokenizer;
 
       /**
        * Constructor.
@@ -48,9 +54,9 @@ namespace AI {
       ~Parser();
 
       /**
-       * Parse tokens and return output.
+       * Parse tokens and return root Element.
        */
-      std::string parse(std::vector<token>);
+      Element *parse(std::vector<token>);
 
       /**
        * Creates interpeter loop.
@@ -78,6 +84,8 @@ namespace AI {
       std::istream *inputStream;
       // Output steam used for writing results
       std::ostream *outputStream;
+      // Root element
+      Element *root;
   };
 };
 

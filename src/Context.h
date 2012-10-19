@@ -4,9 +4,10 @@
 #include <map>
 #include <string>
 
-#include "Element.h"
+#include "AILang.h"
 
 namespace AI {
+  class Element;
   class Context : public std::map<std::string, Element*> {
     public:
       ~Context();

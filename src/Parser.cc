@@ -7,17 +7,27 @@ namespace AI {
 
     this->systemContext = new Context();
     this->globalContext = new Context();
+    
+    this->tokenizer = new Tokenizer();
+    this->root = NULL;
   }
 
   Parser::~Parser() {
+    if (this->root != NULL)
+      delete this->root;
+    delete this->tokenizer;
     delete this->globalContext;
     delete this->systemContext;
   }
 
-  std::string Parser::parse(std::vector<token> tokens) {
-    //std::vector<token> tokens = Tokenizer::getInstance().tokenizeCommand(command);
-    Tokenizer::print(tokens);
-    return "ok";
+  Element *Parser::parse(std::vector<token> tokens) {
+    if (this->root != NULL)
+      delete this->root;
+    this->root = new Element();
+    
+    this->tokenizer->print(tokens);
+    
+    return this->root;
   }
 
   void Parser::loop() {
@@ -45,7 +55,7 @@ namespace AI {
         
         buffer += inputBuffer;
         
-        tokens = Tokenizer::getInstance().tokenizeCommand(inputBuffer);
+        tokens = this->tokenizer->tokenizeCommand(inputBuffer);
         
         for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
           switch (it->type) {
@@ -55,10 +65,10 @@ namespace AI {
           }
         }
         
-        tokens = Tokenizer::getInstance().tokenizeCommand(buffer + ";");
+        tokens = this->tokenizer->tokenizeCommand(buffer + ";");
       } while (delta != 0);
         
-      (*this->outputStream) << this->parse(tokens) << '\n';
+      (*this->outputStream) << this->parse(tokens)->eval(this->globalContext) << '\n';
     } while (!this->inputStream->eof());
   }
 };

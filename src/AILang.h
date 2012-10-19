@@ -9,6 +9,10 @@
 #include "Parser.h"
 
 namespace AI {
+  class Element;
+  class Context;
+  class Tokenizer;
+  class Parser;
 };
 
 #endif

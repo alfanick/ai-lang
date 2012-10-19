@@ -27,16 +27,20 @@ namespace AI {
     std::string data;
   };
 
+  /**
+   * Tokenize string input to tokens.
+   */
   class Tokenizer {
     public:
+      /**
+       * Takes string and returns vector of tokens.
+       */
       std::vector<token> tokenizeCommand(std::string);
-
-      static Tokenizer& getInstance() {
-        static Tokenizer instance;
-        return instance;
-      }
     
-      static void print(std::vector<token> tokens) {
+      /**
+       * Debugging printer
+       */
+      void print(std::vector<token> tokens) {
         for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
           if (it->type == T_NOP || it->type == T_BEGIN)
             continue;
@@ -58,12 +62,18 @@ namespace AI {
       }
 
     private:
+      // Creates new token with given type and data
       token newToken(token_type, std::string);
+      // Creates new token with given type
       token newToken(token_type);
 
+      // Creates new number
       token createNumber(std::string);
+      // Creates new string
       token createString(std::string);
+      // Creates new symbol
       token createSymbol(std::string);
+      // Creates new operator
       token createOperator(std::string);
   };
 };

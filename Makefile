@@ -1,12 +1,12 @@
 CC=clang++
-CFLAGS=-Wall
+CFLAGS=-Wall -g
 LDFLAGS=-lgmpxx -lgmp
 
 all: ail
 
 ail: main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) obj/* -o bin/ail
-	doxygen doxygen.conf
+	/usr/local/bin/doxygen doxygen.conf
 
 main.o: element.o context.o parser.o tokenizer.o
 	$(CC) $(CFLAGS) -c src/main.cc -o obj/main.o

@@ -17,6 +17,7 @@ namespace AI {
 
   std::string Parser::parse(std::string command) {
     std::vector<token> tokens = Tokenizer::getInstance().tokenizeCommand(command);
+    Tokenizer::print(tokens);
     return "ok";
   }
 

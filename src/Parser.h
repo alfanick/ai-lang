@@ -2,8 +2,10 @@
 #define AI_PARSER_FILE
 
 #include <iostream>
+#include <vector>
 
 #include "Context.h"
+#include "Tokenizer.h"
 
 namespace AI {
   /**
@@ -46,9 +48,9 @@ namespace AI {
       ~Parser();
 
       /**
-       * Parse single command and return output.
+       * Parse tokens and return output.
        */
-      std::string parse(std::string);
+      std::string parse(std::vector<token>);
 
       /**
        * Creates interpeter loop.

@@ -7,8 +7,8 @@
 #include <iostream>
 
 namespace AI {
-  enum token_type {T_UNKNOWN, T_NUMBER, T_STRING, T_SYMBOL, T_OPERATOR, T_LB, T_RB, T_SEMICOLON, T_COMMA};
-  enum token_operator {T_SET, T_EQUAL};
+  enum token_type {T_UNKNOWN, T_NUMBER, T_STRING, T_SYMBOL, T_OPERATOR, T_LB, T_RB, T_LC, T_RC, T_LS, T_RS, T_SEMICOLON, T_COMMA, T_NOP, T_BEGIN};
+  
 
   /**
    * Single token structure.
@@ -23,12 +23,6 @@ namespace AI {
 
     /**
      * Token data.
-     *
-     * Data type depends on token type:
-     *   - T_NUMBER - mpf_class
-     *   - T_STRING - std::string
-     *   - T_SYMBOL - std::string
-     *   - T_OPERATOR - token_type
      */
     std::string data;
   };
@@ -44,13 +38,16 @@ namespace AI {
     
       static void print(std::vector<token> tokens) {
         for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-          switch ((*it).type) {
-            case T_NUMBER: std::cerr << "NUMBER"; break;
+          if (it->type == T_NOP || it->type == T_BEGIN)
+            continue;
+          
+          switch (it->type) {
+            case T_NUMBER: std::cerr << "NUMBER " << it->data; break;
             case T_STRING: std::cerr << "STRING " << it->data; break;
             case T_SYMBOL: std::cerr << "SYMBOL " << it->data; break;
             case T_OPERATOR: std::cerr << "OPERATOR " << it->data; break;
-            case T_LB: std::cerr << "LEFT BRACKET"; break;
-            case T_RB: std::cerr << "RIGHT BRACKET"; break;
+            case T_LB: case T_LC: case T_LS: std::cerr << "LEFT BRACKET"; break;
+            case T_RB: case T_RC: case T_RS: std::cerr << "RIGHT BRACKET"; break;
             case T_SEMICOLON: std::cerr << "SEMICOLON"; break;
             case T_COMMA: std::cerr << "COMMA"; break;
             default: std::cerr << "UNKNOWN("<< it->type <<")"; break;

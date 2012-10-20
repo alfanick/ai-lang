@@ -7,7 +7,7 @@ namespace AI {
 
     this->systemContext = new Context();
     this->globalContext = new Context();
-    
+
     this->tokenizer = new Tokenizer();
     this->root = NULL;
   }
@@ -24,25 +24,25 @@ namespace AI {
     if (this->root != NULL)
       delete this->root;
     this->root = new Element(tokens);
-    
+
     return this->root;
   }
 
   void Parser::loop() {
     std::string inputBuffer, buffer;
     std::vector<token> tokens;
-    
+
     int delta;
 
     std::ios::sync_with_stdio(false);
 
-    
+
     do {
       try {
         tokens.clear();
         buffer.clear();
         delta = 0;
-      
+
         do {
           (*this->outputStream) << ">>> ";
           for (int i = 0; i < delta; i++) {
@@ -50,11 +50,11 @@ namespace AI {
           }
 
           std::getline(*this->inputStream, inputBuffer, '\n');
-        
+
           buffer += inputBuffer;
-        
+
           tokens = this->tokenizer->tokenizeCommand(inputBuffer);
-        
+
           for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
             switch (it->type) {
               case T_LB: case T_LC: case T_LS: delta += 1; break;
@@ -62,10 +62,10 @@ namespace AI {
               default: delta += 0;
             }
           }
-        
+
           tokens = this->tokenizer->tokenizeCommand(buffer + ";");
         } while (delta != 0);
-      
+
         (*this->outputStream) << this->parse(tokens)->eval(this->globalContext) << '\n';
       }
       catch (UnexpectedCharacterParserException e) {

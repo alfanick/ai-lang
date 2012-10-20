@@ -40,7 +40,7 @@ namespace AI {
       /**
        * Debugging printer
        */
-      void print(std::vector<token> tokens) {
+      static void print(std::vector<token> tokens) {
         for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
           if (it->type == T_NOP || it->type == T_BEGIN)
             continue;

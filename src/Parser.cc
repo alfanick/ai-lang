@@ -23,9 +23,7 @@ namespace AI {
   Element *Parser::parse(std::vector<token> tokens) {
     if (this->root != NULL)
       delete this->root;
-    this->root = new Element();
-    
-    this->tokenizer->print(tokens);
+    this->root = new Element(tokens);
     
     return this->root;
   }
@@ -40,35 +38,42 @@ namespace AI {
 
     
     do {
-      tokens.clear();
-      buffer.clear();
-      delta = 0;
+      try {
+        tokens.clear();
+        buffer.clear();
+        delta = 0;
       
-      do {
-        (*this->outputStream) << ">>> ";
-        
-        for (int i = 0; i < delta; i++) {
-          (*this->outputStream) << "  ";
-        }
-
-        std::getline(*this->inputStream, inputBuffer, '\n');
-        
-        buffer += inputBuffer;
-        
-        tokens = this->tokenizer->tokenizeCommand(inputBuffer);
-        
-        for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-          switch (it->type) {
-            case T_LB: case T_LC: case T_LS: delta += 1; break;
-            case T_RB: case T_RC: case T_RS: delta -= 1; break;
-            default: delta += 0;
+        do {
+          (*this->outputStream) << ">>> ";
+          for (int i = 0; i < delta; i++) {
+            (*this->outputStream) << "  ";
           }
-        }
+
+          std::getline(*this->inputStream, inputBuffer, '\n');
         
-        tokens = this->tokenizer->tokenizeCommand(buffer + ";");
-      } while (delta != 0);
+          buffer += inputBuffer;
         
-      (*this->outputStream) << this->parse(tokens)->eval(this->globalContext) << '\n';
+          tokens = this->tokenizer->tokenizeCommand(inputBuffer);
+        
+          for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
+            switch (it->type) {
+              case T_LB: case T_LC: case T_LS: delta += 1; break;
+              case T_RB: case T_RC: case T_RS: delta -= 1; break;
+              default: delta += 0;
+            }
+          }
+        
+          tokens = this->tokenizer->tokenizeCommand(buffer + ";");
+        } while (delta != 0);
+      
+        (*this->outputStream) << this->parse(tokens)->eval(this->globalContext) << '\n';
+      }
+      catch (UnexpectedCharacterParserException e) {
+        (*this->outputStream) << "[ERROR] Unexpected character '" << e.uc << "' at position " << e.pos+1 <<".\n";
+      }
+      catch (Exception e) {
+        (*this->outputStream) << "[ERROR] Unknown error.\n";
+      }
     } while (!this->inputStream->eof());
   }
 };

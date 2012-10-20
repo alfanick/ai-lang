@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "AILang.h"
 
 namespace AI {
   std::string OPERATORS_L[] = {"<<=", ">>=", "<<", ">>", "<=", ">=", "==", "!=", "&&", "||", "*=", "/=", "%=", "+=", "-=","&=", "^=", "|=", "=", "&", "^", "|", "<", ">", "~", "!", "-", "=", "*", "/", "%", "+"};
@@ -97,8 +98,9 @@ namespace AI {
           // Operators
           else {
             std::string op;
+            int i;
             // for each operator (operators are sorted from longest to shortest)
-            for (int i = 0; i < OPERATORS_L_COUNT; i++) {
+            for (i = 0; i < OPERATORS_L_COUNT; i++) {
               op = OPERATORS_L[i];
               
               // if there is operator from current position
@@ -109,6 +111,16 @@ namespace AI {
                 it += op.length()-1;
                 break;
               }
+            }
+
+            // whitespaces
+            if (*it == '\n' || *it == '\t' || *it == ' ' || *it == '\r') {
+              continue;
+            }
+
+            // wrong character
+            if (i == OPERATORS_L_COUNT) {
+              throw UnexpectedCharacterParserException(*it, it - command.begin());
             }
           }
         }

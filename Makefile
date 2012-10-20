@@ -6,7 +6,6 @@ all: ail
 
 ail: main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) obj/* -o bin/ail
-	/usr/local/bin/doxygen doxygen.conf
 
 main.o: element.o context.o parser.o tokenizer.o
 	$(CC) $(CFLAGS) -c src/main.cc -o obj/main.o

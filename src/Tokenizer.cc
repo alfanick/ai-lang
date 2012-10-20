@@ -89,6 +89,10 @@ namespace AI {
           // Arguments comma
           if (*it == ',') {
             tokens.push_back(this->newToken(T_COMMA));
+          } else
+          // Semicolon separator
+          if (*it == ';') {
+            tokens.push_back(this->newToken(T_SEMICOLON));
           }
           // Operators
           else {
@@ -127,6 +131,10 @@ namespace AI {
               (it+1)->data.insert(0, "-");
             }
           }
+        }
+        // if its a semicolon
+        if (it->type == T_SEMICOLON && (it+1)->type == T_SEMICOLON) {
+          it->type = T_NOP;
         }
       }
     }

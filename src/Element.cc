@@ -12,7 +12,6 @@ namespace AI {
       // push current token
       currentTokens.push_back(*it);
 
-      // new instruction (current instruction ends with semicolon and its on main context)
       if (it->type == T_SEMICOLON && level == 0) {
         Tokenizer::print(currentTokens);
         std::cout << "\n\n";

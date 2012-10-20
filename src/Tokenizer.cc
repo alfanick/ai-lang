@@ -7,17 +7,17 @@
 namespace AI {
   std::string OPERATORS_L[] = {"<<=", ">>=", "<<", ">>", "<=", ">=", "==", "!=", "&&", "||", "*=", "/=", "%=", "+=", "-=","&=", "^=", "|=", "=", "&", "^", "|", "<", ">", "~", "!", "-", "=", "*", "/", "%", "+"};
   int OPERATORS_L_COUNT = 32;
-  
+
   std::vector<token> Tokenizer::tokenizeCommand(std::string command) {
     std::vector<token> tokens;
-    
+
     std::string buffer;
-    
+
     // workaround for negatives
     tokens.push_back(this->newToken(T_BEGIN));
-    
+
     token_type currentToken = T_UNKNOWN;
-    
+
     for (std::string::iterator it = command.begin(); it != command.end(); it++) {
       // String parsing
       if (*it == '\'') {
@@ -27,9 +27,9 @@ namespace AI {
         // If parsing string then stop
         } else {
           tokens.push_back(this->createString(buffer));
-          
+
           buffer.clear();
-          
+
           currentToken = T_UNKNOWN;
         }
       } else
@@ -64,10 +64,10 @@ namespace AI {
           if (currentToken == T_NUMBER) {
             tokens.push_back(this->createNumber(buffer));
           }
-          
+
           buffer.clear();
           currentToken = T_UNKNOWN;
-          
+
           // Brackets parsing
           if (*it == '(') {
             tokens.push_back(this->newToken(T_LB));
@@ -102,7 +102,7 @@ namespace AI {
             // for each operator (operators are sorted from longest to shortest)
             for (i = 0; i < OPERATORS_L_COUNT; i++) {
               op = OPERATORS_L[i];
-              
+
               // if there is operator from current position
               if (std::string(it, command.end()).find(op) == 0) {
                 // put operator
@@ -126,7 +126,7 @@ namespace AI {
         }
       }
     }
-    
+
     // Negative numbers
     if (tokens.size() >= 3) {
       // start from middle (where probably is sign)
@@ -150,35 +150,35 @@ namespace AI {
         }
       }
     }
-    
+
     return tokens;
   }
-  
+
   token Tokenizer::newToken(token_type type, std::string data) {
     token t;
     t.type = type;
     t.data = data;
     return t;
   }
-  
+
   token Tokenizer::newToken(token_type type) {
     token t;
     t.type = type;
     return t;
   }
-  
+
   token Tokenizer::createString(std::string data) {
     return this->newToken(T_STRING, data);
   }
-  
+
   token Tokenizer::createSymbol(std::string data) {
     return this->newToken(T_SYMBOL, data);
   }
-  
+
   token Tokenizer::createNumber(std::string data) {
     return this->newToken(T_NUMBER, data);
   }
-  
+
   token Tokenizer::createOperator(std::string data) {
     return this->newToken(T_OPERATOR, data);
   }

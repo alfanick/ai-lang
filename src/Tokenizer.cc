@@ -37,6 +37,14 @@ namespace AI {
       if (currentToken == T_STRING) {
         buffer += *it;
       } else
+      // Comments
+      if (*it == '#') {
+        currentToken = T_COMMENT;
+      } else
+      if (currentToken == T_COMMENT) {
+        if (*it == '\n')
+          currentToken = T_UNKNOWN;
+      } else
       // Outside of string
       if (currentToken != T_STRING) {
         // If symbol name

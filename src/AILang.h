@@ -25,6 +25,19 @@ namespace AI {
         this->uc = uc;
         this->pos = pos;
       }
+
+      ~UnexpectedCharacterParserException() throw() { };
+  };
+  class UnexpectedOperatorParserException : public ParserException {
+    public:
+      std::string op;
+      int pos;
+      UnexpectedOperatorParserException(std::string op, int pos) : ParserException() {
+        this->op = op;
+        this->pos = pos;
+      }
+
+      ~UnexpectedOperatorParserException() throw() { };
   };
 };
 

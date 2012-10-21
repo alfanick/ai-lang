@@ -87,12 +87,13 @@ namespace AI {
           if (currentLevel == 0 && ct->type == T_RB && maybeFunction) {
             if ((ct+1)->type == T_SEMICOLON) {
               std::cerr << "wykonanie funkcji\n";
+              break;
             } else
             if ((ct+1)->type == T_OPERATOR && (ct+1)->data == "=") {
               std::cerr << "przypisanie funkcji\n";
+              break;
             }
-            break;
-          } else
+          }
           if (currentLevel == 0) {
             if (ct->type == T_OPERATOR) {
               int index = -1;

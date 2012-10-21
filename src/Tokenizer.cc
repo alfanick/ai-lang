@@ -113,6 +113,10 @@ namespace AI {
 
               // if there is operator from current position
               if (std::string(it, command.end()).find(op) == 0) {
+                if (tokens.back().type == T_OPERATOR) {
+                  if (op != "!" && op != "~")
+                    throw UnexpectedOperatorParserException(op, it-command.begin());
+                }
                 // put operator
                 tokens.push_back(this->createOperator(op));
                 // move iterator (skip operator length)

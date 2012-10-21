@@ -71,6 +71,9 @@ namespace AI {
       catch (UnexpectedCharacterParserException e) {
         (*this->outputStream) << "[ERROR] Unexpected character '" << e.uc << "' at position " << e.pos+1 <<".\n";
       }
+      catch (UnexpectedOperatorParserException e) {
+        (*this->outputStream) << "[ERROR] Unexpected operator '" << e.op << "' at position " << e.pos+1 << ".\n";
+      }
       catch (Exception e) {
         (*this->outputStream) << "[ERROR] Unknown error.\n";
       }

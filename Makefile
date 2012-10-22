@@ -1,5 +1,5 @@
 CC=clang++
-CFLAGS=-Wall -g
+CFLAGS=-Wall -O3
 LDFLAGS=-lgmpxx -lgmp
 
 all: ail

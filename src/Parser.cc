@@ -22,11 +22,20 @@ namespace AI {
                                                  &modulo, &divide, &multiply, &o_not, &bit_not };
   };
 
+  Element* o_pow(Context* args) {
+    mpf_class o;
+    mpf_pow_ui(o.get_mpf_t(),((dynamic_cast<NumberElement*>(args->getSymbol("$1")->eval(args)))->mp_value)->get_mpf_t(),
+        ((dynamic_cast<NumberElement*>(args->getSymbol("$2")->eval(args)))->mp_value)->get_si());
+
+    return NumberElement::create(o);
+  }
+
   Parser::Parser(std::istream & in, std::ostream& out) {
     this->inputStream = &in;
     this->outputStream = &out;
 
     this->systemContext = new Context();
+    this->systemContext->setSymbol("pow", new NativeSymbolElement("pow", &o_pow));
     this->globalContext = new Context(this->systemContext);
 
     for (int i = 0; i < OPERATORS_COUNT; i++) {

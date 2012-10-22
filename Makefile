@@ -11,16 +11,25 @@ main.o: element.o context.o parser.o tokenizer.o
 	$(CC) $(CFLAGS) -c src/main.cc -o obj/main.o
 
 element.o:
-	$(CC) $(CFLAGS) -c src/element.cc -o obj/element.o
+	$(CC) $(CFLAGS) -c src/Element.cc -o obj/element.o
 
-context.o: element.o
-	$(CC) $(CFLAGS) -c src/context.cc -o obj/context.o
+symbol_element.o:
+	$(CC) $(CFLAGS) -c src/SymbolElement.cc -o obj/symbol_element.o
+
+string_element.o:
+	$(CC) $(CFLAGS) -c src/StringElement.cc -o obj/string_element.o
+
+number_element.o: symbol_element.o string_element.o
+	$(CC) $(CFLAGS) -c src/NumberElement.cc -o obj/number_element.o
+
+context.o: element.o number_element.o
+	$(CC) $(CFLAGS) -c src/Context.cc -o obj/context.o
 
 tokenizer.o:
-	$(CC) $(CFLAGS) -c src/tokenizer.cc -o obj/tokenizer.o
+	$(CC) $(CFLAGS) -c src/Tokenizer.cc -o obj/tokenizer.o
 
 parser.o: context.o tokenizer.o
-	$(CC) $(CFLAGS) -c src/parser.cc -o obj/parser.o
+	$(CC) $(CFLAGS) -c src/Parser.cc -o obj/parser.o
 
 clean:
 		rm -f obj/*

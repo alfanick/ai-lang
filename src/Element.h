@@ -10,11 +10,10 @@ namespace AI {
   class Context;
   class Element {
     public:
-      Element(std::vector<token>);
+      virtual Element* eval(Context*);
+      virtual std::string value();
 
-      std::string eval(Context*);
-    protected:
-      std::vector<Element> flow;
+      virtual ~Element();
   };
 };
 

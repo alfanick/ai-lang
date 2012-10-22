@@ -39,6 +39,25 @@ namespace AI {
 
       ~UnexpectedOperatorParserException() throw() { };
   };
+  class ContextException : public Exception { };
+  class SystemSymbolContextException : public ContextException {
+    public:
+      std::string sym;
+      SystemSymbolContextException(std::string sym) : ContextException() {
+        this->sym = sym;
+      }
+
+      ~SystemSymbolContextException() throw() { };
+  };
+  class UnknownSymbolContextException : public ContextException {
+    public:
+      std::string sym;
+      UnknownSymbolContextException(std::string sym) : ContextException() {
+        this->sym = sym;
+      }
+
+      ~UnknownSymbolContextException() throw() { };
+  };
 };
 
 #endif

@@ -8,7 +8,7 @@
 
 namespace AI {
   class Context;
-  
+
   /**
    * Main parser.
    *
@@ -33,7 +33,7 @@ namespace AI {
        * it is used instead of systemContext.
        */
       Context *globalContext;
-    
+
       /**
        * Tokenizer for language.
        */
@@ -57,6 +57,8 @@ namespace AI {
        * Parse tokens and return root Element.
        */
       Element *parse(std::vector<token>);
+
+      static std::vector<Element*> createFlow(std::vector<token>, Context* localContext);
 
       /**
        * Creates interpeter loop.
@@ -84,8 +86,8 @@ namespace AI {
       std::istream *inputStream;
       // Output steam used for writing results
       std::ostream *outputStream;
-      // Root element
-      Element *root;
+      // Main flow
+      std::vector<Element*> flow;
   };
 };
 

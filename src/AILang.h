@@ -16,6 +16,7 @@ namespace AI {
   class Parser;
 
   class Exception : public std::exception { };
+  class ExitTrap : public Exception { public: ~ExitTrap() throw() { }; };
   class ParserException : public Exception { };
   class UnexpectedCharacterParserException : public ParserException {
     public:
@@ -57,6 +58,10 @@ namespace AI {
       }
 
       ~UnknownSymbolContextException() throw() { };
+  };
+  class NotFunctionContextException : public UnknownSymbolContextException {
+    public:
+      NotFunctionContextException(std::string sym) : UnknownSymbolContextException(sym) { };
   };
 };
 

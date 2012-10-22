@@ -2,6 +2,10 @@
 #include "StringElement.h"
 #include "NumberElement.h"
 #include "SymbolElement.h"
+#include "DefinitionSymbolElement.h"
+#include "NativeSymbolElement.h"
+
+#include "Operators.h"
 
 namespace AI {
   std::string OPERATORS[] = { "||", "&&", "|", "^", "&", "!=", "==", ">=", ">", "<=", "<", ">>", "<<", "-", "+", "%", "/", "*", "!", "~"};
@@ -11,12 +15,24 @@ namespace AI {
                                    "operator.modulo", "operator.divide", "operator.multiply", "operator.not", "operator.bit_not" };
   int OPERATORS_COUNT = 20;
 
+  namespace Operators {
+    Element *(*OPERATORS_NATIVE[])(Context*) = { &o_or, &o_and, &bit_or, &bit_xor, &bit_and,
+                                                 &not_equal, &equal, &greater_equal, &greater, &less_equal, &less,
+                                                 &bit_shift_right, &bit_shift_left, &subtract, &add,
+                                                 &modulo, &divide, &multiply, &o_not, &bit_not };
+  };
+
   Parser::Parser(std::istream & in, std::ostream& out) {
     this->inputStream = &in;
     this->outputStream = &out;
 
     this->systemContext = new Context();
     this->globalContext = new Context(this->systemContext);
+
+    for (int i = 0; i < OPERATORS_COUNT; i++) {
+      this->systemContext->setSymbol("system." + OPERATORS_FUNC[i], new NativeSymbolElement(OPERATORS_FUNC[i], Operators::OPERATORS_NATIVE[i]));
+      this->globalContext->setSymbol(OPERATORS_FUNC[i], this->systemContext->getSymbol("system." + OPERATORS_FUNC[i]));
+    }
 
     this->tokenizer = new Tokenizer();
   }
@@ -93,9 +109,14 @@ namespace AI {
         int operationPosition = -1;
         std::vector<token> tmpTokens;
         std::vector<Element*> tmpFlow;
+
+        std::string symbolName;
+        std::vector<token>::iterator argsBegin, operatorPlace;
         for (std::vector<token>::iterator ct = currentTokens.begin(); ct != (currentTokens.end()-1); ct++) {
           tmpTokens.clear();
           tmpFlow.clear();
+          if (ct->type == T_COMMA)
+            ct->type = T_SEMICOLON;
 
           if (ct->type == T_LB)
             currentLevel++;
@@ -116,23 +137,49 @@ namespace AI {
 
             tmpFlow = Parser::createFlow(tmpTokens, localContext);
             localContext->setSymbol(ct->data, tmpFlow.back());
+
+            currentFlow.push_back(new SymbolElement(ct->data));
             break;
           } else
           if (currentPosition == 0 && ct->type == T_SYMBOL && (ct+1)->type == T_SEMICOLON) {
-            std::cerr << "wywolanie zmiennej;\n";
+            //std::cerr << "wywolanie zmiennej;\n";
             currentFlow.push_back(new SymbolElement(ct->data));
             break;
           } else
           if (currentPosition == 0 && ct->type == T_SYMBOL && (ct+1)->type == T_LB) {
             maybeFunction = true;
+            symbolName = ct->data;
+            argsBegin = ct+1;
           } else
           if (currentLevel == 0 && ct->type == T_RB && maybeFunction) {
             if ((ct+1)->type == T_SEMICOLON) {
-              std::cerr << "wykonanie funkcji\n";
+              //std::cerr << "wykonanie funkcji\n";
+              tmpTokens.resize(ct - argsBegin);
+              std::copy(argsBegin+1, ct, tmpTokens.begin());
+              tmpTokens.back().type = T_SEMICOLON;
+
+              SymbolElement *symbol = new SymbolElement(symbolName);
+              symbol->injectFlow(Parser::createFlow(tmpTokens, symbol->context));
+
+              currentFlow.push_back(symbol);
               break;
             } else
             if ((ct+1)->type == T_OPERATOR && (ct+1)->data == "=") {
-              std::cerr << "przypisanie funkcji\n";
+              //std::cerr << "przypisanie funkcji\n";
+
+              tmpTokens.resize(ct - argsBegin);
+              std::copy(argsBegin+1, ct, tmpTokens.begin());
+              tmpTokens.back().type = T_SEMICOLON;
+
+              DefinitionSymbolElement *definition = new DefinitionSymbolElement(symbolName);
+              definition->injectFlow(Parser::createFlow(tmpTokens, definition->context));
+
+              tmpTokens.clear();
+              tmpTokens.resize(currentTokens.end() - ct);
+              std::copy(ct+2, currentTokens.end(), tmpTokens.begin());
+              definition->body = Parser::createFlow(tmpTokens, definition->context);
+
+              localContext->setSymbol(symbolName, definition);
               break;
             }
           }
@@ -148,6 +195,7 @@ namespace AI {
               if (index < operationIndex) {
                 operationIndex = index;
                 operationPosition = ct - currentTokens.begin();
+                operatorPlace = ct;
               }
             }
           }
@@ -157,7 +205,12 @@ namespace AI {
         }
 
         if (operationIndex != OPERATORS_COUNT) {
-          std::cerr << "dzialanie " << OPERATORS_FUNC[operationIndex] << "(<0,"<< operationPosition-1 <<">, <"<< operationPosition+1 <<","<< currentTokens.size()-2 <<">)\n";
+          SymbolElement *symbol = new SymbolElement(OPERATORS_FUNC[operationIndex]);
+          operatorPlace->type = T_SEMICOLON;
+
+          symbol->injectFlow(Parser::createFlow(currentTokens, symbol->context));
+
+          currentFlow.push_back(symbol);
         }
 
         // clear current tokens
@@ -242,8 +295,15 @@ namespace AI {
       catch (SystemSymbolContextException e) {
         (*this->outputStream) << "[ERROR] Trying to modify system '" << e.sym << "' symbol.\n";
       }
+      catch (NotFunctionContextException e) {
+        (*this->outputStream) << "[ERROR] Symbol '"<< e.sym <<"' is a variable, not a function.\n";
+      }
       catch (UnknownSymbolContextException e) {
         (*this->outputStream) << "[ERROR] Symbol '" << e.sym << "' is unknown.\n";
+      }
+      catch (ExitTrap e) {
+        (*this->outputStream) << "Good bye!\n";
+        break;
       }
       catch (Exception e) {
         (*this->outputStream) << "[ERROR] Unknown error.\n";

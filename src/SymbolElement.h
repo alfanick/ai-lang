@@ -1,6 +1,8 @@
 #ifndef AI_SYMBOLELEMENT_FILE
 #define AI_SYMBOLELEMENT_FILE
 
+#include <sstream>
+
 #include "Element.h"
 #include "Context.h"
 
@@ -14,7 +16,10 @@ namespace AI {
 
 			virtual ~SymbolElement();
 
+			void injectFlow(std::vector<Element*>);
+
 			std::string symbol;
+			Context *context;
 	};
 };
 

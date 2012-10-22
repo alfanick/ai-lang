@@ -17,6 +17,14 @@ namespace AI {
       virtual ~NumberElement();
 
       mpf_class* mp_value;
+
+      static NumberElement* create(mpf_class mp) {
+        NumberElement* n = new NumberElement("0");
+        delete n->mp_value;
+        n->mp_value = new mpf_class(mp);
+
+        return n;
+      }
   };
 };
 

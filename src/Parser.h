@@ -58,6 +58,12 @@ namespace AI {
        */
       Element *parse(std::vector<token>);
 
+      /**
+       * Creates commands flow.
+       *
+       * For given tokens, Element trees are created in given context.
+       * Flow is sequential execution, Element is tree execution.
+       */
       static std::vector<Element*> createFlow(std::vector<token>, Context* localContext);
 
       /**

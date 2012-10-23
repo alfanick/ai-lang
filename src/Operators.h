@@ -7,6 +7,9 @@
 #include "StringElement.h"
 
 namespace AI {
+  /**
+   * Native operators implementation.
+   */
 	namespace Operators {
 		Element* o_or(Context* args);
 

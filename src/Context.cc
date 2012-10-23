@@ -36,6 +36,7 @@ namespace AI {
     } while(currentContext != NULL);
 
     if (currentContext == NULL) {
+      this->erase(symbolName);
       this->insert(std::pair<std::string, Element*>(symbolName, value));
     }
 
@@ -55,7 +56,11 @@ namespace AI {
       }
 
       currentContext = currentContext->parentContext;
-    } while(currentContext != NULL);
+
+      // loop
+      if (currentContext == this)
+        break;
+    } while (currentContext != NULL);
 
     return result;
   }

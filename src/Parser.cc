@@ -63,9 +63,6 @@ namespace AI {
     // current instruction tokens
     std::vector<token> currentTokens;
 
-//    Parser::getInstance().systemContext->setSymbol("system.operator.add", new StaticFunctionElement(&so_add));
-//    Parser::getInstance().globalContext->setSymbol("operator.add", Parser::getInstance().systemContext->getSymbol("system.operator.add"));
-
     std::vector<Element*> currentFlow;
     currentFlow.push_back(new Element());
 
@@ -111,8 +108,6 @@ namespace AI {
 
         currentLevel = 0;
 
-        Tokenizer::print(currentTokens);
-        std::cout << "\n\n";
         bool maybeFunction = false;
         int operationIndex = OPERATORS_COUNT;
         int operationPosition = -1;
@@ -147,11 +142,9 @@ namespace AI {
             tmpFlow = Parser::createFlow(tmpTokens, localContext);
             localContext->setSymbol(ct->data, tmpFlow.back());
 
-            currentFlow.push_back(new SymbolElement(ct->data));
             break;
           } else
           if (currentPosition == 0 && ct->type == T_SYMBOL && (ct+1)->type == T_SEMICOLON) {
-            //std::cerr << "wywolanie zmiennej;\n";
             currentFlow.push_back(new SymbolElement(ct->data));
             break;
           } else
@@ -162,20 +155,18 @@ namespace AI {
           } else
           if (currentLevel == 0 && ct->type == T_RB && maybeFunction) {
             if ((ct+1)->type == T_SEMICOLON) {
-              //std::cerr << "wykonanie funkcji\n";
               tmpTokens.resize(ct - argsBegin);
               std::copy(argsBegin+1, ct, tmpTokens.begin());
               tmpTokens.back().type = T_SEMICOLON;
 
               SymbolElement *symbol = new SymbolElement(symbolName);
+              symbol->context->parentContext = localContext;
               symbol->injectFlow(Parser::createFlow(tmpTokens, symbol->context));
 
               currentFlow.push_back(symbol);
               break;
             } else
             if ((ct+1)->type == T_OPERATOR && (ct+1)->data == "=") {
-              //std::cerr << "przypisanie funkcji\n";
-
               tmpTokens.resize(ct - argsBegin);
               std::copy(argsBegin+1, ct, tmpTokens.begin());
               tmpTokens.back().type = T_SEMICOLON;
@@ -186,6 +177,7 @@ namespace AI {
               tmpTokens.clear();
               tmpTokens.resize(currentTokens.end() - ct);
               std::copy(ct+2, currentTokens.end(), tmpTokens.begin());
+
               definition->body = Parser::createFlow(tmpTokens, definition->context);
 
               localContext->setSymbol(symbolName, definition);
@@ -217,7 +209,8 @@ namespace AI {
           SymbolElement *symbol = new SymbolElement(OPERATORS_FUNC[operationIndex]);
           operatorPlace->type = T_SEMICOLON;
 
-          symbol->injectFlow(Parser::createFlow(currentTokens, symbol->context));
+          //if (localContext->parentContext != NULL)
+            symbol->injectFlow(Parser::createFlow(currentTokens, symbol->context));
 
           currentFlow.push_back(symbol);
         }
@@ -292,8 +285,9 @@ namespace AI {
 
         this->parse(tokens);
         for (std::vector<Element*>::iterator command = this->flow.begin(); command != this->flow.end(); command++) {
-          (*this->outputStream) << (*command)->eval(this->globalContext)->value() << '\n';
+          (*this->outputStream) << (*command)->eval(this->globalContext)->value() << ' ';
         }
+        (*this->outputStream) << '\n';
       }
       catch (UnexpectedCharacterParserException e) {
         (*this->outputStream) << "[ERROR] Unexpected character '" << e.uc << "' at position " << e.pos+1 <<".\n";

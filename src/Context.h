@@ -8,6 +8,12 @@
 
 namespace AI {
   class Element;
+  /**
+   * Symbols context.
+   *
+   * Database of defined symbols. Each variable or function
+   * must belong to context.
+   */
   class Context : public std::map<std::string, Element*> {
     public:
       /**

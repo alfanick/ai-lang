@@ -17,10 +17,6 @@ namespace AI {
 
 		result = result->eval(this->context);
 
-		//if (this->argumentsFlow.size() > 0 && result->argumentsFlow.size() == 0) {
-		//	throw NotFunctionContextException(this->symbol);
-		//}
-
 		this->context->parentContext = NULL;
 
 		return result;

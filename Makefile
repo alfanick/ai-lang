@@ -40,6 +40,9 @@ operators.o:
 parser.o: context.o tokenizer.o operators.o
 	$(CC) $(CFLAGS) -c src/Parser.cc -o obj/parser.o
 
+docs:
+	doxygen doxygen.conf
+
 clean:
 		rm -f obj/*
 		rm -rf bin/*

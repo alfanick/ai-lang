@@ -3,11 +3,11 @@
 namespace AI {
 
   Element* Element::eval(Context* localContext) {
-    return new Element();
+    return this;
   }
 
   std::string Element::value() {
-    return "NO OPERATION";
+    return "";
   }
 
   Element::~Element() {

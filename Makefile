@@ -7,6 +7,12 @@ all: ail
 ail: main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) obj/* -o bin/ail
 
+ail_rpn: rpn.o
+	$(CC) $(CFLAGS) $(LDFLAGS) obj/* -o bin/ail_rpn
+
+rpn.o: element.o context.o rpn_parser.o tokenizer.o
+	$(CC) $(CFLAGS) -c src/rpn.cc -o obj/rpn.o
+
 main.o: element.o context.o parser.o tokenizer.o
 	$(CC) $(CFLAGS) -c src/main.cc -o obj/main.o
 
@@ -39,6 +45,9 @@ operators.o:
 
 parser.o: context.o tokenizer.o operators.o
 	$(CC) $(CFLAGS) -c src/Parser.cc -o obj/parser.o
+
+rpn_parser.o: parser.o
+	$(CC) $(CFLAGS) -c src/RpnParser.cc -o obj/rpn_parser.o
 
 docs:
 	doxygen doxygen.conf

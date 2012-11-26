@@ -92,6 +92,7 @@ namespace AI {
       std::istream *inputStream;
       // Output steam used for writing results
       std::ostream *outputStream;
+		protected:
       // Main flow
       std::vector<Element*> flow;
   };

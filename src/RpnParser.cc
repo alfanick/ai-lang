@@ -7,6 +7,8 @@
 
 #include "Operators.h"
 
+#include <stack>
+
 namespace AI {
   std::string OPERATORS[] = { "||", "&&", "|", "^", "&", "!=", "==", ">=", ">", "<=", "<", ">>", "<<", "-", "+", "%", "/", "*", "!", "~"};
   std::string OPERATORS_FUNC[] = { "operator.or", "operator.and", "operator.bit_or", "operator.bit_xor", "operator.bit_and",
@@ -58,8 +60,6 @@ namespace AI {
   }
 
   std::vector<Element*> Parser::createFlow(std::vector<token> tokens, Context *localContext) {
-    // context level
-    int level = 0;
     // current instruction tokens
     std::vector<token> currentTokens;
 
@@ -68,165 +68,36 @@ namespace AI {
 
     // foreach token
     for (std::vector<token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-      // push current token
-      if (it->type != T_NOP && it->type != T_BEGIN)
-        currentTokens.push_back(*it);
-
-      if ((it->type == T_SEMICOLON || it->type == T_COMMA) && level == 0) {
-        int currentLevel = 0;
-        int currentPosition = 0;
-
-        // minify brackets
-        bool ok = false;
-        std::vector<token>::iterator a, b;
-        do {
-          for (std::vector<token>::iterator ct = currentTokens.begin(); ct != currentTokens.end(); ct++) {
-            // zaczyna sie i konczy nawiasem, ale bez ich zmiany
-            if (ct->type == T_LB) {
-              if (currentLevel == 0) {
-                a = ct;
-              }
-              ok = true;
-              currentLevel++;
-            } else if (ct->type == T_RB) {
-              currentLevel--;
-              ok = true;
-              if (currentLevel == 0) {
-                b = ct;
-              }
-            } else if (currentLevel == 0 && ct->type != T_SEMICOLON) {
-              ok = false;
+      if (it->type == T_OPERATOR) {
+        if (it->data == "=") {
+          currentTokens.clear();
+          currentTokens.resize(tokens.size());
+          copy(tokens.begin(), it-1, currentTokens.begin());
+          localContext->setSymbol(currentFlow.back()->value(), Parser::createFlow(currentTokens, localContext).back());
+          currentFlow.pop_back();
+        } else {
+          int index = -1;
+          for (index = 0; index < OPERATORS_COUNT; index++)
+            if (it->data == OPERATORS[index])
               break;
-            }
-          }
 
-          if (ok) {
-            currentTokens.erase(b);
-            currentTokens.erase(a);
-          }
-        } while (ok);
+          SymbolElement *symbol = new SymbolElement(OPERATORS_FUNC[index]);
 
-        currentLevel = 0;
+          std::vector<Element*> argsFlow;
+          argsFlow.push_back(new Element());
+          argsFlow.push_back(currentFlow.back()); currentFlow.pop_back();
+          argsFlow.insert(argsFlow.end()-1, currentFlow.back()); currentFlow.pop_back();
 
-        bool maybeFunction = false;
-        int operationIndex = OPERATORS_COUNT;
-        int operationPosition = -1;
-        std::vector<token> tmpTokens;
-        std::vector<Element*> tmpFlow;
-
-        std::string symbolName;
-        std::vector<token>::iterator argsBegin, operatorPlace;
-        for (std::vector<token>::iterator ct = currentTokens.begin(); ct != (currentTokens.end()-1); ct++) {
-          tmpTokens.clear();
-          tmpFlow.clear();
-          if (ct->type == T_COMMA)
-            ct->type = T_SEMICOLON;
-
-          if (ct->type == T_LB)
-            currentLevel++;
-          else if (ct->type == T_RB)
-            currentLevel--;
-
-          if (currentPosition == 0 && ct->type == T_NUMBER && (ct+1)->type == T_SEMICOLON) {
-            currentFlow.push_back(new NumberElement(ct->data));
-            break;
-          } else
-          if (currentPosition == 0 && ct->type == T_STRING && (ct+1)->type == T_SEMICOLON) {
-            currentFlow.push_back(new StringElement(ct->data));
-            break;
-          } else
-          if (currentPosition == 0 && ct->type == T_SYMBOL && ((ct+1)->type == T_OPERATOR && (ct+1)->data == "=")) {
-            tmpTokens.resize(currentTokens.end() - ct - 2);
-            std::copy(ct+2, currentTokens.end(), tmpTokens.begin());
-
-            tmpFlow = Parser::createFlow(tmpTokens, localContext);
-            localContext->setSymbol(ct->data, tmpFlow.back());
-
-            break;
-          } else
-          if (currentPosition == 0 && ct->type == T_SYMBOL && (ct+1)->type == T_SEMICOLON) {
-            currentFlow.push_back(new SymbolElement(ct->data));
-            break;
-          } else
-          if (currentPosition == 0 && ct->type == T_SYMBOL && (ct+1)->type == T_LB) {
-            maybeFunction = true;
-            symbolName = ct->data;
-            argsBegin = ct+1;
-          } else
-          if (currentLevel == 0 && ct->type == T_RB && maybeFunction) {
-            if ((ct+1)->type == T_SEMICOLON) {
-              tmpTokens.resize(ct - argsBegin);
-              std::copy(argsBegin+1, ct, tmpTokens.begin());
-              tmpTokens.back().type = T_SEMICOLON;
-
-              SymbolElement *symbol = new SymbolElement(symbolName);
-              symbol->context->parentContext = localContext;
-              symbol->injectFlow(Parser::createFlow(tmpTokens, symbol->context));
-
-              currentFlow.push_back(symbol);
-              break;
-            } else
-            if ((ct+1)->type == T_OPERATOR && (ct+1)->data == "=") {
-              tmpTokens.resize(ct - argsBegin);
-              std::copy(argsBegin+1, ct, tmpTokens.begin());
-              tmpTokens.back().type = T_SEMICOLON;
-
-              DefinitionSymbolElement *definition = new DefinitionSymbolElement(symbolName);
-              definition->injectFlow(Parser::createFlow(tmpTokens, definition->context));
-
-              tmpTokens.clear();
-              tmpTokens.resize(currentTokens.end() - ct);
-              std::copy(ct+2, currentTokens.end(), tmpTokens.begin());
-
-              definition->body = Parser::createFlow(tmpTokens, definition->context);
-
-              localContext->setSymbol(symbolName, definition);
-              break;
-            }
-          }
-          if (currentLevel == 0) {
-            if (ct->type == T_OPERATOR) {
-              int index = -1;
-              for (index = 0; index < OPERATORS_COUNT; index++) {
-                if (ct->data == OPERATORS[index]) {
-                  break;
-                }
-              }
-
-              if (index < operationIndex) {
-                operationIndex = index;
-                operationPosition = ct - currentTokens.begin();
-                operatorPlace = ct;
-              }
-            }
-          }
-
-          if (ct->type != T_NOP && ct->type != T_BEGIN)
-            currentPosition++;
-        }
-
-        if (operationIndex != OPERATORS_COUNT) {
-          SymbolElement *symbol = new SymbolElement(OPERATORS_FUNC[operationIndex]);
-          operatorPlace->type = T_SEMICOLON;
-
-          //if (localContext->parentContext != NULL)
-            symbol->injectFlow(Parser::createFlow(currentTokens, symbol->context));
+          symbol->injectFlow(argsFlow);
 
           currentFlow.push_back(symbol);
         }
-
-        // clear current tokens
-        currentTokens.clear();
-      } else {
-        // check for context change
-        switch (it->type) {
-          // deeper context
-          case T_LB: case T_LC: case T_LS: level += 1; break;
-          // shallower context
-          case T_RB: case T_RC: case T_RS: level -= 1; break;
-          // nop
-          default: level += 0;
-        }
+      } else
+      if (it->type == T_NUMBER) {
+        currentFlow.push_back(new NumberElement(it->data));
+      } else
+      if (it->type == T_SYMBOL) {
+        currentFlow.push_back(new SymbolElement(it->data));
       }
     }
 

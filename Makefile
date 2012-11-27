@@ -4,10 +4,10 @@ LDFLAGS=-lgmpxx -lgmp
 
 all: ail
 
-ail: main.o
+ail: clean main.o
 	$(CC) $(CFLAGS) $(LDFLAGS) obj/* -o bin/ail
 
-ail_rpn: rpn.o
+ail_rpn: clean rpn.o
 	$(CC) $(CFLAGS) $(LDFLAGS) obj/* -o bin/ail_rpn
 
 rpn.o: element.o context.o rpn_parser.o tokenizer.o
@@ -46,13 +46,12 @@ operators.o:
 parser.o: context.o tokenizer.o operators.o
 	$(CC) $(CFLAGS) -c src/Parser.cc -o obj/parser.o
 
-rpn_parser.o: parser.o
+rpn_parser.o: context.o tokenizer.o operators.o
 	$(CC) $(CFLAGS) -c src/RpnParser.cc -o obj/rpn_parser.o
 
 docs:
 	doxygen doxygen.conf
 
 clean:
-		rm -f obj/*
-		rm -rf bin/*
+		rm -rf obj/*
 		rm -rf docs/*

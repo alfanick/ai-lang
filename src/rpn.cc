@@ -1,10 +1,10 @@
 #include "AILang.h"
 
-#include "RpnParser.h"
+#include "Parser.h"
 
 int main() {
   setlocale(LC_ALL, "C");
-  AI::RpnParser::getInstance().loop();
+  AI::Parser::getInstance().loop();
 
   return 0;
 }

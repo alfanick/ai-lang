@@ -83,6 +83,10 @@ namespace AI {
 
           SymbolElement *symbol = new SymbolElement(OPERATORS_FUNC[index]);
 
+          if (currentFlow.size() <= 2) {
+            throw UnexpectedOperatorParserException(it->data, tokens.end() - it - 1);
+          }
+
           std::vector<Element*> argsFlow;
           argsFlow.push_back(new Element());
           argsFlow.push_back(currentFlow.back()); currentFlow.pop_back();

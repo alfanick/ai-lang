@@ -304,6 +304,9 @@ namespace AI {
       catch (UnknownSymbolContextException e) {
         (*this->outputStream) << "[ERROR] Symbol '" << e.sym << "' is unknown.\n";
       }
+      catch (DivisionByZeroParserException e) {
+        (*this->outputStream) << "[ERROR] Division by zero is forbidden.\n";
+      }
       catch (ExitTrap e) {
         (*this->outputStream) << "Good bye!\n";
         break;

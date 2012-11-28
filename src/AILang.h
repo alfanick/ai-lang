@@ -40,6 +40,7 @@ namespace AI {
 
       ~UnexpectedOperatorParserException() throw() { };
   };
+  class DivisionByZeroParserException : public ParserException { };
   class ContextException : public Exception { };
   class SystemSymbolContextException : public ContextException {
     public:

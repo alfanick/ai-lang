@@ -132,6 +132,10 @@ namespace AI {
 		}
 
 		Element* divide(Context* args) {
+      if (*((dynamic_cast<NumberElement*>(args->getSymbol("$2")->eval(args)))->mp_value) == 0) {
+        throw DivisionByZeroParserException();
+      }
+
 			return NumberElement::create(
         *((dynamic_cast<NumberElement*>(args->getSymbol("$1")->eval(args)))->mp_value)
           /
